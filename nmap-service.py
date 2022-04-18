@@ -26,6 +26,7 @@ nmapScopeFile = config["nmap"]["scopeFile"]
 
 jsonFile = open('log.json','a')
 nma = nmap.PortScannerAsync()
+nma_service = nmap.PortScanner()
 
 def callback_result(host, scan_result):
 
@@ -35,7 +36,12 @@ def callback_result(host, scan_result):
         for protocol in ['tcp','udp']:
             if protocol in scan_result['scan'][host]:
                 for port in scan_result['scan'][host][protocol]:
-                    service = scan_result['scan'][host][protocol][port]
+                    arguments = f"--min-rate 3000 -p {port} -sV "
+                    if protocol == 'udp':
+                        arguments += ' -sU'
+                    print('Scan', arguments)
+                    service = nma_service.scan(hosts=host, arguments=arguments, sudo=True)
+                    service = service['scan'][host][protocol][port]
                     service['port'] = str(port)
                     service['host'] = host
                     service['protocol'] = protocol
@@ -54,11 +60,12 @@ while True:
 
     with open(nmapScopeFile,'r') as networks:
         networks = ' '.join([network.strip() for network in networks])
-        nma.scan(hosts=networks, arguments=nmapArguments, callback=callback_result, sudo="-sU" in nmapArguments)
+        nma.scan(hosts=networks, arguments=nmapArguments, callback=callback_result, sudo=True)
         
 
     while nma.still_scanning():
-        nma.wait(1000)
+        nma.wait(10)
+
 
     end = time.time()
     loopTime = 60 * 60 * 24 * 2 #1 days
