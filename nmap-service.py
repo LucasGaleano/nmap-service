@@ -14,6 +14,7 @@ import configparser
 
 def log_json(jsonFile, content: dict):
     content['timestamp'] = str(datetime.now())
+    content['app'] = "Nmap"
     print(json.dumps(content))
     jsonFile.write(json.dumps(content))
     jsonFile.write('\n')
@@ -36,12 +37,15 @@ def callback_result(host, scan_result):
         for protocol in ['tcp','udp']:
             if protocol in scan_result['scan'][host]:
                 for port in scan_result['scan'][host][protocol]:
-                    arguments = f"--min-rate 3000 -p {port} -sV "
+                    arguments = f"--min-rate 3000 -p {port} -sV -n -Pn"
                     if protocol == 'udp':
                         arguments += ' -sU'
-                    print('Scan', arguments)
                     service = nma_service.scan(hosts=host, arguments=arguments, sudo=True)
-                    service = service['scan'][host][protocol][port]
+                    try:
+                        service = service['scan'][host][protocol][port]
+                    except:
+                        print("Error", service)
+                        exit()
                     service['port'] = str(port)
                     service['host'] = host
                     service['protocol'] = protocol
@@ -68,7 +72,7 @@ while True:
 
 
     end = time.time()
-    loopTime = 60 * 60 * 24 * 2 #1 days
+    loopTime = 60 * 60 * 24 * 30 #one month
     TimeTaken = int(end - start)
     sleepFor = max(loopTime -TimeTaken, 0)
     log_json(jsonFile,{"message":"Nmap is done", "duration": str(timedelta(seconds=TimeTaken))})
