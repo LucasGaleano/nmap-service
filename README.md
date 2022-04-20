@@ -11,8 +11,11 @@ For the UDP ports will only scan the ports that found open without checking the 
 ## How to install
 `pip3 install -r requirements.txt`
 
-For performance purpose, change the package file ~/.local/lib/python<version>/site-packages/nmap/nmap.py adding the parameters '-n'
-From `output = self.scan(hosts, arguments="-sL")` to `output = self.scan(hosts, arguments="-sL -n")`
+For performance purpose, change the package file ~/.local/lib/python<version>/site-packages/nmap/nmap.py adding the parameters '-n' on the line 188.
+  
+From `output = self.scan(hosts, arguments="-sL")` 
+  
+To `output = self.scan(hosts, arguments="-sL -n")`
 
 ## How to configure
 All settings are made in nmap.conf
