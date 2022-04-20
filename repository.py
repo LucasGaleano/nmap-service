@@ -40,7 +40,7 @@ class Repository():
 
 
 
-repo = Repository('ddbb')
+
 
 # print(repo.is_new_service('2.2.2.2','333','tcp'))
 # print(repo.is_new_service('2.2.2.2','444','tcp'))
