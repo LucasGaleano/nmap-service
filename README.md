@@ -3,8 +3,11 @@
 ## How it works
 
 The program scans all the IPs from the file (file 'ips' by default) using the arguments parameter on the config file.
-It will run every month or when the scanning is finished.
+
+It will run every month (default or can be change in loopTime parameter) or when the scanning is finished.
+
 The results are in real time and will be logged in json format, through stdout and to the log.json file.
+
 For the UDP ports will only scan the ports that found open without checking the service.
 
 
