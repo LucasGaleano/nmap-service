@@ -10,7 +10,7 @@ import configparser
 
 
 def log_json(jsonFile, content: dict):
-    content['timestamp'] = str(datetime.now())
+    content['timestamp'] = str(datetime.now().isoformat())
     content['app'] = "Nmap"
     print(json.dumps(content))
     jsonFile.write(json.dumps(content))
@@ -33,11 +33,13 @@ def callback_result(host, scan_result):
 
     if not scan_result:
         log_json(jsonFile,{"message":"The scan failed to start"})
+    elif not scan_result['scan']:
+        log_json(jsonFile,{"message":f"No result for {host}"})
     else:
         for protocol in ['tcp','udp']:
             if protocol in scan_result['scan'][host]:
                 for port in scan_result['scan'][host][protocol]:
-                    arguments = f"--min-rate 3000 -p {port} -sV -n -Pn"
+                    arguments = f"-p {port} -sV -n -Pn"
                     if is_ipv6(host):
                         arguments += ' -6'
                     if protocol == 'udp':
@@ -48,13 +50,13 @@ def callback_result(host, scan_result):
                     except:
                         print("Error", service)
                         exit()
-                    service['port'] = str(port)
-                    service['host'] = host
+                    service['dstport'] = str(port)
+                    service['dstip'] = host
                     service['protocol'] = protocol
                     service['type'] = 'common'
                     service['message'] = f"{host} {port}/{protocol}"
 
-                    if repo.is_new_service(service['host'], service['port'], service['protocol'], service['state']):
+                    if repo.is_new_service(service['dstip'], service['dstport'], service['protocol'], service['state']):
                         service['type'] = 'new'
                         repo.add_new_service(host, str(port), protocol, service['state'])
                     log_json(jsonFile,service)
